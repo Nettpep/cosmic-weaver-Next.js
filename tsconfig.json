@@ -25,7 +25,10 @@
         "name": "next"
       }
     ],
-    "strict": false
+    "strict": false,
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "next-env.d.ts",
