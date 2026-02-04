@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #050505;
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.cosmic-glow {
+  box-shadow: 0 0 15px rgba(176, 38, 255, 0.3);
+}
+
+.gold-glow {
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(176, 38, 255, 0.3);
+}
