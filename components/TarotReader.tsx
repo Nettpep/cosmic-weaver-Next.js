@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sparkles, RefreshCw, Eye } from 'lucide-react';
 import { MAJOR_ARCANA } from '../constants';
 import { TarotCard, TarotReading } from '../types';
@@ -9,9 +9,81 @@ const TarotReader: React.FC<{ onSaveReading?: (reading: TarotReading) => void }>
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [interpretation, setInterpretation] = useState<string | null>(null);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
+  const [remainingToday, setRemainingToday] = useState<number | null>(null);
+
+  const DAILY_LIMIT = 2;
+
+  // Read today's usage on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('tarot_usage');
+      const today = new Date().toISOString().slice(0, 10);
+      if (!raw) {
+        setRemainingToday(DAILY_LIMIT);
+        return;
+      }
+      const parsed = JSON.parse(raw) as { date?: string; count?: number };
+      if (parsed.date === today && typeof parsed.count === 'number') {
+        const remaining = Math.max(DAILY_LIMIT - parsed.count, 0);
+        setRemainingToday(remaining);
+      } else {
+        setRemainingToday(DAILY_LIMIT);
+      }
+    } catch {
+      setRemainingToday(DAILY_LIMIT);
+    }
+  }, []);
+
+  const canUseToday = (): boolean => {
+    if (typeof window === 'undefined') return true;
+
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const raw = window.localStorage.getItem('tarot_usage');
+
+      if (!raw) {
+        // first use today
+        window.localStorage.setItem('tarot_usage', JSON.stringify({ date: today, count: 1 }));
+        setRemainingToday(DAILY_LIMIT - 1);
+        return true;
+      }
+
+      const parsed = JSON.parse(raw) as { date?: string; count?: number };
+      const prevCount = typeof parsed.count === 'number' ? parsed.count : 0;
+
+      if (parsed.date === today) {
+        if (prevCount >= DAILY_LIMIT) {
+          setLimitMessage(`วันนี้คุณใช้สิทธิ์ดูดวงครบ ${DAILY_LIMIT} ครั้งแล้ว ลองใหม่พรุ่งนี้นะ 🌙`);
+          setRemainingToday(0);
+          return false;
+        }
+
+        const newCount = prevCount + 1;
+        window.localStorage.setItem('tarot_usage', JSON.stringify({ date: today, count: newCount }));
+        setRemainingToday(Math.max(DAILY_LIMIT - newCount, 0));
+        return true;
+      }
+
+      // New day
+      window.localStorage.setItem('tarot_usage', JSON.stringify({ date: today, count: 1 }));
+      setRemainingToday(DAILY_LIMIT - 1);
+      return true;
+    } catch {
+      // ถ้า localStorage มีปัญหา ให้ปล่อยใช้ได้ตามปกติ (เพื่อไม่ทำให้ UX พัง)
+      return true;
+    }
+  };
 
   const drawCards = async () => {
+    setLimitMessage(null);
     if (!question.trim()) return;
+
+    // Daily usage limit (anonymous, per-browser)
+    const allowed = canUseToday();
+    if (!allowed) return;
+
     setLoading(true);
     setInterpretation(null);
     setCards([]);
@@ -48,6 +120,20 @@ const TarotReader: React.FC<{ onSaveReading?: (reading: TarotReading) => void }>
       <h2 className="text-3xl md:text-5xl font-serif text-cosmic-gold mb-8 tracking-widest text-center animate-pulse-slow">
         Ask the Cosmic Weaver
       </h2>
+
+      {remainingToday !== null && (
+        <p className="text-sm text-gray-400 mb-4 text-center">
+          วันนี้คุณสามารถดูดวงได้อีก{' '}
+          <span className="text-cosmic-gold font-semibold">{remainingToday}</span>{' '}
+          ครั้ง
+        </p>
+      )}
+
+      {limitMessage && (
+        <p className="text-sm text-red-400 mb-4 text-center">
+          {limitMessage}
+        </p>
+      )}
 
       {!interpretation && !loading && (
         <div className="w-full max-w-lg relative z-10">
