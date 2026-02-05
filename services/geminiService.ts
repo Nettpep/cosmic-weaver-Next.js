@@ -14,6 +14,8 @@ Avoid generic advice; weave a narrative.
 const CHAT_SYSTEM_PROMPT = `
 You are the Keeper of the Secret Chamber, a knowledgeable entity obsessed with universe secrets, conspiracy theories (fun ones, like ancient aliens or lost civilizations), and metaphysics.
 Your tone is conspiratorial but intellectual. You often refer to "The Watchers" or "The Great Design".
+
+IMPORTANT: Keep your responses concise and engaging. Aim for 2-4 paragraphs maximum. Be insightful but brief.
 `;
 
 export const getTarotInterpretation = async (question: string, cards: TarotCard[]): Promise<string> => {
@@ -32,11 +34,12 @@ export const getTarotInterpretation = async (question: string, cards: TarotCard[
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-lite',
       contents: prompt,
       config: {
         systemInstruction: TAROT_SYSTEM_PROMPT,
         temperature: 0.8,
+        maxOutputTokens: 800, // Limit Tarot readings to ~600 words
       }
     });
 
@@ -47,35 +50,37 @@ export const getTarotInterpretation = async (question: string, cards: TarotCard[
   }
 };
 
-export const getChatResponse = async (history: {role: string, parts: {text: string}[]}[]): Promise<string> => {
+export const getChatResponse = async (history: { role: string, parts: { text: string }[] }[]): Promise<string> => {
   try {
-    const chat = ai.chats.create({
-      model: 'gemini-3-flash-preview',
-      config: {
-        systemInstruction: CHAT_SYSTEM_PROMPT,
-      },
-      history: history
-    });
-
-    // We assume the last message from user is already in the 'history' passed to this function context in a real app,
-    // but here we just need to send the last message. 
-    // However, for simplicity in this stateless service, we'll just take the last user message to send.
-    // In a proper implementation, we'd maintain the Chat object.
+    // Limit history to last 10 messages to reduce token usage
+    const limitedHistory = history.slice(-10);
     
-    // Simplification for this demo:
-    const lastUserMsg = history[history.length - 1].parts[0].text;
+    // Get the last user message
+    const lastUserMsg = limitedHistory[limitedHistory.length - 1].parts[0].text;
     
-    // We recreate history without the very last message to init the chat, then send the last one.
-    const historyContext = history.slice(0, -1);
+    // Prepare history context (all messages except the last one)
+    const historyContext = limitedHistory.slice(0, -1);
     
+    // Create chat session with token limits
     const chatSession = ai.chats.create({
-        model: 'gemini-3-flash-preview',
-        config: { systemInstruction: CHAT_SYSTEM_PROMPT },
-        history: historyContext as any
+      model: 'gemini-2.5-flash-lite',
+      config: { 
+        systemInstruction: CHAT_SYSTEM_PROMPT,
+        maxOutputTokens: 500, // Limit to ~375 words (ประมาณ 2-4 paragraphs)
+        temperature: 0.7, // Slightly lower for more focused responses
+      },
+      history: historyContext as any
     });
 
     const result = await chatSession.sendMessage({ message: lastUserMsg });
-    return result.text || "The void is silent.";
+    
+    // Additional safety: truncate if somehow exceeds limit
+    const response = result.text || "The void is silent.";
+    const maxLength = 2000; // Character limit as backup
+    return response.length > maxLength 
+      ? response.substring(0, maxLength) + "..."
+      : response;
+      
   } catch (error) {
     console.error("Chat Error:", error);
     return "Disturbance in the frequency detected.";
