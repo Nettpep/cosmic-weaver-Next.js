@@ -50,8 +50,8 @@ export default function Navigation() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-2">
-            <NavItem href="/" icon={<Disc className="w-4 h-4"/>} label="Home" />
-            <NavItem href="/tarot" icon={<Ghost className="w-4 h-4"/>} label="Tarot" />
+            <NavItem href="/" icon={<Disc className="w-4 h-4"/>} label="หน้าหลัก" />
+            <NavItem href="/tarot" icon={<Ghost className="w-4 h-4"/>} label="ดูดวงไพ่" />
           </div>
 
           {/* Mobile Menu Button */}
@@ -69,8 +69,8 @@ export default function Navigation() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10 absolute w-full pb-4 px-4 flex flex-col gap-2 shadow-2xl">
-          <NavItem href="/" icon={<Disc className="w-4 h-4"/>} label="Home" />
-          <NavItem href="/tarot" icon={<Ghost className="w-4 h-4"/>} label="Tarot" />
+          <NavItem href="/" icon={<Disc className="w-4 h-4"/>} label="หน้าหลัก" />
+          <NavItem href="/tarot" icon={<Ghost className="w-4 h-4"/>} label="ดูดวงไพ่" />
         </div>
       )}
     </nav>

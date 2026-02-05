@@ -62,11 +62,11 @@ const App: React.FC = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-2">
-              <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="Home" />
-              <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="Archives" />
-              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" href="/tarot" />
-              <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="Secret Chamber" />
-              <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="Dashboard" />
+              <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="หน้าหลัก" />
+              <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="บทความ" />
+              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="ดูดวงไพ่" href="/tarot" />
+              <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="ห้องลับ" />
+              <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="บันทึกการดูดวง" />
             </div>
 
             {/* Mobile Menu Button */}
@@ -84,11 +84,11 @@ const App: React.FC = () => {
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
            <div className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10 absolute w-full pb-4 px-4 flex flex-col gap-2 shadow-2xl">
-              <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="Home" />
-              <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="Archives" />
-              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" href="/tarot" />
-              <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="Secret Chamber" />
-              <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="Dashboard" />
+              <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="หน้าหลัก" />
+              <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="บทความ" />
+              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="ดูดวงไพ่" href="/tarot" />
+              <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="ห้องลับ" />
+              <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="บันทึกการดูดวง" />
            </div>
         )}
       </nav>
@@ -107,12 +107,12 @@ const App: React.FC = () => {
              </div>
              
              <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-tighter">
-               Unveil the <span className="text-cosmic-purple italic">Invisible</span>
+               เปิดม่าน<span className="text-cosmic-purple italic">สิ่งที่มองไม่เห็น</span>
              </h1>
-             <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl font-light leading-relaxed">
-               Welcome, traveler. You have found the nexus where science meets spirituality. 
-               Weave your destiny through the Tarot, explore the secrets of the universe, 
-               and converse with the unknown.
+             <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl font-light leading-relaxed thai-body">
+               ยินดีต้อนรับ นักเดินทางแห่งดวงดาว ที่นี่คือจุดบรรจบระหว่างวิทยาศาสตร์และจิตวิญญาณ 
+               ถักทอเส้นด้ายแห่งชะตาชีวิตของคุณผ่านไพ่ทาโรต์ สำรวจความลับของจักรวาล 
+               และสนทนากับพลังที่ไม่อาจมองเห็นได้ด้วยตาเปล่า
              </p>
 
              <div className="flex flex-col sm:flex-row gap-4">
@@ -124,13 +124,13 @@ const App: React.FC = () => {
                }}
                 className="px-8 py-4 bg-cosmic-gold text-black font-serif font-bold rounded-lg hover:scale-105 transition shadow-[0_0_20px_rgba(255,215,0,0.3)]"
                >
-                 Consult the Oracle
+                 ปรึกษาไพ่ทาโรต์
                </button>
                <button 
                 onClick={() => setCurrentView('BLOG')}
                 className="px-8 py-4 bg-transparent border border-purple-500/50 text-purple-200 font-serif rounded-lg hover:bg-purple-900/20 transition hover:border-purple-400"
                >
-                 Read the Archives
+                 อ่านบทความย้อนหลัง
                </button>
              </div>
           </div>
@@ -155,7 +155,7 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/5 py-8 text-center text-gray-600 text-sm font-serif">
-        <p>&copy; {new Date().getFullYear()} The Cosmic Weaver. All threads connected.</p>
+        <p>&copy; {new Date().getFullYear()} The Cosmic Weaver. ทุกเส้นด้ายล้วนเชื่อมถึงกัน</p>
       </footer>
     </div>
   );
