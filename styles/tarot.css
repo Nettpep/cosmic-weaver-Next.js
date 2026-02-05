@@ -1,0 +1,522 @@
+/* Cosmic Weaver Tarot - Mystical Design System */
+
+/* Import Mystical Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Sarabun:wght@200;300;400;500;600;700&family=Prompt:wght@200;300;400;500;600;700&display=swap');
+
+:root {
+    /* Mystical Color Palette */
+    --cosmic-deep-purple: hsl(270, 60%, 15%);
+    --cosmic-dark-violet: hsl(270, 50%, 25%);
+    --cosmic-mystic-purple: hsl(270, 55%, 35%);
+    --cosmic-lavender: hsl(270, 45%, 55%);
+    --cosmic-light-purple: hsl(270, 40%, 75%);
+
+    --cosmic-gold: hsl(45, 90%, 60%);
+    --cosmic-bright-gold: hsl(45, 95%, 70%);
+    --cosmic-dark-gold: hsl(45, 80%, 45%);
+
+    --cosmic-space-black: hsl(270, 30%, 8%);
+    --cosmic-midnight: hsl(270, 25%, 12%);
+
+    /* Ethereal Glows */
+    --glow-purple: 0 0 20px hsla(270, 70%, 50%, 0.6),
+        0 0 40px hsla(270, 70%, 50%, 0.4),
+        0 0 60px hsla(270, 70%, 50%, 0.2);
+
+    --glow-gold: 0 0 15px hsla(45, 90%, 60%, 0.6),
+        0 0 30px hsla(45, 90%, 60%, 0.4),
+        0 0 45px hsla(45, 90%, 60%, 0.2);
+
+    --glow-white: 0 0 10px hsla(0, 0%, 100%, 0.5),
+        0 0 20px hsla(0, 0%, 100%, 0.3);
+
+    /* Gradients */
+    --gradient-cosmic: linear-gradient(135deg,
+            var(--cosmic-deep-purple) 0%,
+            var(--cosmic-dark-violet) 50%,
+            var(--cosmic-mystic-purple) 100%);
+
+    --gradient-mystical: radial-gradient(ellipse at top,
+            var(--cosmic-mystic-purple) 0%,
+            var(--cosmic-midnight) 100%);
+
+    --gradient-gold: linear-gradient(135deg,
+            var(--cosmic-dark-gold) 0%,
+            var(--cosmic-gold) 50%,
+            var(--cosmic-bright-gold) 100%);
+
+    --gradient-glass: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+
+    /* Typography */
+    --font-mystical: 'Cinzel', serif;
+    --font-elegant: 'Cormorant Garamond', serif;
+    --font-thai: 'Sarabun', sans-serif;
+    --font-thai-display: 'Prompt', sans-serif;
+}
+
+/* Global Tarot Styles */
+.tarot-container {
+    min-height: 100vh;
+    background: var(--gradient-mystical);
+    position: relative;
+    overflow: hidden;
+    font-family: var(--font-thai);
+}
+
+.tarot-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(148, 0, 211, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+    animation: cosmicPulse 20s ease-in-out infinite;
+}
+
+@keyframes cosmicPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: scale(1.1);
+    }
+}
+
+/* Animated Stars Background */
+.stars-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Tarot Card Styles */
+.tarot-card {
+    width: 180px;
+    height: 300px;
+    perspective: 1000px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.tarot-card:hover {
+    transform: translateY(-10px) scale(1.05);
+}
+
+.tarot-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.tarot-card.flipped .tarot-card-inner {
+    transform: rotateY(180deg);
+}
+
+.tarot-card.reversed .tarot-card-inner {
+    transform: rotateZ(180deg);
+}
+
+.tarot-card.flipped.reversed .tarot-card-inner {
+    transform: rotateY(180deg) rotateZ(180deg);
+}
+
+.tarot-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 30px var(--cosmic-mystic-purple);
+}
+
+.tarot-card-front {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 3px solid var(--cosmic-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Remove inner padding so the card image can fill the frame */
+    padding: 0;
+}
+
+.tarot-card-back {
+    background: var(--gradient-cosmic);
+    border: 3px solid var(--cosmic-gold);
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Remove inner padding so back image fills the frame as well */
+    padding: 0;
+    background-image: url('/tarot/card-back-pattern.svg');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Card Glow Effect */
+.tarot-card:hover .tarot-card-face {
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.6),
+        var(--glow-gold);
+    animation: cardGlow 2s ease-in-out infinite;
+}
+
+@keyframes cardGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            0 0 20px var(--cosmic-gold);
+    }
+
+    50% {
+        box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            0 0 40px var(--cosmic-bright-gold);
+    }
+}
+
+/* Deck Stack */
+.tarot-deck {
+    position: relative;
+    width: 180px;
+    height: 300px;
+    perspective: 1000px;
+}
+
+.deck-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.deck-card:nth-child(1) {
+    transform: translateY(0px) translateX(0px);
+}
+
+.deck-card:nth-child(2) {
+    transform: translateY(-2px) translateX(-2px);
+}
+
+.deck-card:nth-child(3) {
+    transform: translateY(-4px) translateX(-4px);
+}
+
+.deck-card:nth-child(4) {
+    transform: translateY(-6px) translateX(-6px);
+}
+
+/* Shuffle Animation */
+@keyframes shuffle {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-20px) rotate(5deg);
+    }
+
+    50% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    75% {
+        transform: translateY(-15px) rotate(3deg);
+    }
+}
+
+.shuffling {
+    animation: shuffle 0.6s ease-in-out;
+}
+
+/* Glassmorphism Buttons */
+.glass-button {
+    position: relative;
+    padding: 16px 32px;
+    border-radius: 16px;
+    background: var(--gradient-glass);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-family: var(--font-thai-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.glass-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.glass-button:hover::before {
+    left: 100%;
+}
+
+.glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--cosmic-gold);
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.4),
+        var(--glow-gold);
+    transform: translateY(-2px);
+}
+
+.glass-button:active {
+    transform: translateY(0px);
+}
+
+.glass-button-gold {
+    background: var(--gradient-gold);
+    border-color: var(--cosmic-bright-gold);
+    color: var(--cosmic-deep-purple);
+    font-weight: 600;
+}
+
+/* Spread Selector Cards */
+.spread-card {
+    padding: 24px;
+    border-radius: 20px;
+    background: var(--gradient-glass);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.spread-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.6s;
+}
+
+.spread-card:hover::before {
+    transform: scale(1);
+}
+
+.spread-card:hover {
+    border-color: var(--cosmic-gold);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        var(--glow-purple);
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Spread reveal animation */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.card-details:hover {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Particle Effects */
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--cosmic-gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px) translateX(100px) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Typography */
+.mystical-title {
+    font-family: var(--font-mystical);
+    font-size: 3rem;
+    font-weight: 700;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.elegant-text {
+    font-family: var(--font-elegant);
+    color: var(--cosmic-light-purple);
+    font-size: 1.2rem;
+    line-height: 1.8;
+}
+
+.thai-title {
+    font-family: var(--font-thai-display);
+    color: white;
+    font-weight: 600;
+}
+
+.thai-body {
+    font-family: var(--font-thai);
+    color: var(--cosmic-light-purple);
+    line-height: 1.8;
+}
+
+/* Loading/Spinner */
+.cosmic-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--cosmic-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: var(--glow-gold);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+/* Scroll Indicator Animation */
+@keyframes scroll {
+
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(10px);
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tarot-card {
+        width: 140px;
+        height: 233px;
+    }
+
+    .mystical-title {
+        font-size: 2rem;
+    }
+
+    .glass-button {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+}

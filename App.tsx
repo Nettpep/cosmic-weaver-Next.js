@@ -16,14 +16,20 @@ const App: React.FC = () => {
       setReadings(prev => [reading, ...prev]);
   };
 
-  const NavItem: React.FC<{ view: ViewState; icon: React.ReactNode; label: string }> = ({ view, icon, label }) => (
+  const NavItem: React.FC<{ view?: ViewState; icon: React.ReactNode; label: string; href?: string }> = ({ view, icon, label, href }) => (
     <button
       onClick={() => {
-        setCurrentView(view);
+        if (href) {
+          if (typeof window !== 'undefined') {
+            window.location.href = href;
+          }
+        } else if (view) {
+          setCurrentView(view);
+        }
         setMobileMenuOpen(false);
       }}
       className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
-        currentView === view
+        view && currentView === view
           ? 'bg-cosmic-gold text-black shadow-glow font-bold'
           : 'text-gray-400 hover:text-white hover:bg-white/10'
       }`}
@@ -58,7 +64,7 @@ const App: React.FC = () => {
             <div className="hidden md:flex items-center space-x-2">
               <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="Home" />
               <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="Archives" />
-              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" />
+              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" href="/tarot" />
               <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="Secret Chamber" />
               <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="Dashboard" />
             </div>
@@ -80,7 +86,7 @@ const App: React.FC = () => {
            <div className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10 absolute w-full pb-4 px-4 flex flex-col gap-2 shadow-2xl">
               <NavItem view="HOME" icon={<Disc className="w-4 h-4"/>} label="Home" />
               <NavItem view="BLOG" icon={<Book className="w-4 h-4"/>} label="Archives" />
-              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" />
+              <NavItem view="TAROT" icon={<Ghost className="w-4 h-4"/>} label="Oracle" href="/tarot" />
               <NavItem view="SECRET_CHAMBER" icon={<Disc className="w-4 h-4"/>} label="Secret Chamber" />
               <NavItem view="DASHBOARD" icon={<User className="w-4 h-4"/>} label="Dashboard" />
            </div>
@@ -93,7 +99,7 @@ const App: React.FC = () => {
         {/* Render Views */}
         {currentView === 'HOME' && (
           <div className="flex flex-col items-center justify-center min-h-[80vh] text-center max-w-4xl mx-auto animate-fade-in">
-             <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-tr from-cosmic-900 via-purple-900 to-black p-1 mb-8 shadow-[0_0_50px_rgba(176,38,255,0.4)] animate-float">
+             <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-tr from-cosmic-900 via-purple-900 to-black p-1 mb-8 shadow-[0_0_50px_rgba(176,38,255,0.4)]">
                 <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden relative">
                     <img src="https://picsum.photos/400/400?grayscale" className="opacity-60 object-cover w-full h-full mix-blend-overlay" />
                     <Disc className="w-20 h-20 text-cosmic-gold absolute animate-pulse-slow" />
@@ -111,7 +117,11 @@ const App: React.FC = () => {
 
              <div className="flex flex-col sm:flex-row gap-4">
                <button 
-                onClick={() => setCurrentView('TAROT')}
+               onClick={() => {
+                 if (typeof window !== 'undefined') {
+                   window.location.href = '/tarot';
+                 }
+               }}
                 className="px-8 py-4 bg-cosmic-gold text-black font-serif font-bold rounded-lg hover:scale-105 transition shadow-[0_0_20px_rgba(255,215,0,0.3)]"
                >
                  Consult the Oracle
