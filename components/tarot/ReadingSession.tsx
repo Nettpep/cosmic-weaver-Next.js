@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SpreadConfig } from '@/types/tarot';
 import { useTarotStore } from '@/store/tarotStore';
 import CardDeck from './CardDeck';
+import FannedDeck from './FannedDeck';
 import SpreadLayout from './SpreadLayout';
 import '@/styles/tarot.css';
 import { getTarotSpreadSummary } from '@/services/geminiService';
@@ -31,6 +32,12 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
     const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
+    // Fix hydration mismatch: render stars only on client side
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     if (!currentSession) {
         return null;
@@ -84,9 +91,9 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
 
     return (
         <div className="tarot-container" style={{ minHeight: '100vh', padding: '40px 20px' }}>
-            {/* Stars Background */}
+            {/* Stars Background - render only after mount to avoid hydration mismatch */}
             <div className="stars-background">
-                {Array.from({ length: 50 }).map((_, i) => (
+                {isMounted && Array.from({ length: 50 }).map((_, i) => (
                     <div
                         key={i}
                         className="star"
@@ -198,33 +205,34 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
                 {/* Step: Draw */}
                 {currentStep === 'draw' && (
                     <div>
-                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                             <h2 className="thai-title" style={{ fontSize: '1.8rem', marginBottom: '16px' }}>
-                                👆 จั่วไพ่
+                                ✨ จั่วไพ่ที่ใจเราเลือก
                             </h2>
                             <p className="thai-body" style={{ fontSize: '1.1rem' }}>
-                                คลิกที่สำรับไพ่เพื่อจั่วไพ่ใบต่อไป
+                                สัมผัสพลังงานของไพ่แต่ละใบ แล้วเลือกใบที่ดึงดูดคุณ
                             </p>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '60px', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                            {/* Deck */}
-                            <div>
-                                <CardDeck
-                                    cards={deckState.remainingCards}
-                                    onCardDraw={handleDrawCard}
-                                    size="medium"
-                                />
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center' }}>
+                            {/* Fanned Deck - วงกลม 2 ชั้น แสดงไพ่ครบ 78 ใบ */}
+                            <FannedDeck
+                                cards={deckState.remainingCards}
+                                onCardSelect={(index) => handleDrawCard()}
+                                size="medium"
+                                maxVisibleCards={78} // แสดงครบทั้ง 78 ใบ (วงนอก 39 + วงใน 39)
+                            />
 
                             {/* Spread Preview */}
-                            <div style={{ flex: 1, minWidth: '400px' }}>
-                                <SpreadLayout
-                                    spread={spread}
-                                    drawnCards={drawnCards}
-                                    animateReveal={true}
-                                />
-                            </div>
+                            {drawnCards.length > 0 && (
+                                <div style={{ width: '100%', maxWidth: '800px' }}>
+                                    <SpreadLayout
+                                        spread={spread}
+                                        drawnCards={drawnCards}
+                                        animateReveal={true}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

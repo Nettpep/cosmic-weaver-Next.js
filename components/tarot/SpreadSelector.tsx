@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SpreadConfig } from '@/types/tarot';
 import { spreadsList } from '@/data/spreadConfigs';
 import '@/styles/tarot.css';
@@ -22,11 +22,18 @@ const difficultyLabels = {
 };
 
 export default function SpreadSelector({ onSelectSpread }: SpreadSelectorProps) {
+    // Fix hydration mismatch: render stars only on client side
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     return (
         <div className="tarot-container" style={{ padding: '40px 20px', minHeight: '100vh' }}>
-            {/* Stars Background */}
+            {/* Stars Background - render only after mount to avoid hydration mismatch */}
             <div className="stars-background">
-                {Array.from({ length: 50 }).map((_, i) => (
+                {isMounted && Array.from({ length: 50 }).map((_, i) => (
                     <div
                         key={i}
                         className="star"
