@@ -6,6 +6,7 @@ import { useTarotStore } from '@/store/tarotStore';
 import CardDeck from './CardDeck';
 import SpreadLayout from './SpreadLayout';
 import '@/styles/tarot.css';
+import { getTarotSpreadSummary } from '@/services/geminiService';
 
 interface ReadingSessionProps {
     spread: SpreadConfig;
@@ -27,6 +28,9 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
 
     const [questionInput, setQuestionInput] = useState('');
     const [isShuffling, setIsShuffling] = useState(false);
+    const [aiSummary, setAiSummary] = useState<string | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
 
     if (!currentSession) {
         return null;
@@ -61,7 +65,8 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
     };
 
     const handleSaveReading = () => {
-        saveReading();
+        // ถ้ามีสรุปจาก AI แล้ว ให้บันทึกแนบไปด้วย
+        saveReading(aiSummary || undefined);
         if (onComplete) {
             onComplete();
         }
@@ -69,6 +74,9 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
 
     const handleCancel = () => {
         resetSession();
+        setAiSummary(null);
+        setAiError(null);
+        setAiLoading(false);
         if (onCancel) {
             onCancel();
         }
@@ -296,6 +304,83 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
                                     </p>
                                 </div>
                             ))}
+
+                            {/* AI Summary Section */}
+                            <div
+                                style={{
+                                    marginTop: '32px',
+                                    paddingTop: '24px',
+                                    borderTop: '1px dashed rgba(255,255,255,0.25)',
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                    <h4 className="thai-title" style={{ fontSize: '1.3rem' }}>
+                                        🤖 ให้ AI สรุปภาพรวมผังไพ่
+                                    </h4>
+                                    <button
+                                        className="glass-button glass-button-gold"
+                                        style={{ padding: '10px 20px', fontSize: '0.95rem' }}
+                                        disabled={aiLoading || drawnCards.length === 0}
+                                        onClick={async () => {
+                                            if (drawnCards.length === 0) return;
+                                            setAiError(null);
+                                            setAiLoading(true);
+                                            try {
+                                                const summary = await getTarotSpreadSummary({
+                                                    question: currentSession.question,
+                                                    spread,
+                                                    drawnCards,
+                                                });
+                                                setAiSummary(summary);
+                                            } catch (err) {
+                                                console.error(err);
+                                                setAiError('ไม่สามารถเชื่อมต่อกับ AI ได้ชั่วคราว ลองใหม่อีกครั้งนะ');
+                                            } finally {
+                                                setAiLoading(false);
+                                            }
+                                        }}
+                                    >
+                                        {aiLoading ? 'กำลังเชื่อมต่อจักรวาล...' : 'ให้ AI สรุปผล'}
+                                    </button>
+                                </div>
+
+                                {aiError && (
+                                    <p className="thai-body" style={{ color: '#fecaca', marginBottom: '8px' }}>
+                                        {aiError}
+                                    </p>
+                                )}
+
+                                {aiSummary && (
+                                    <div
+                                        style={{
+                                            marginTop: '12px',
+                                            padding: '16px 20px',
+                                            borderRadius: '16px',
+                                            background:
+                                                'radial-gradient(circle at top, rgba(147, 51, 234,0.35), rgba(15,23,42,0.9))',
+                                            border: '1px solid rgba(250, 250, 250, 0.18)',
+                                        }}
+                                    >
+                                        <p
+                                            className="thai-body"
+                                            style={{ whiteSpace: 'pre-wrap', fontSize: '1rem', lineHeight: 1.8 }}
+                                        >
+                                            {aiSummary}
+                                        </p>
+                                        <p
+                                            className="thai-body"
+                                            style={{
+                                                fontSize: '0.8rem',
+                                                opacity: 0.7,
+                                                marginTop: '8px',
+                                            }}
+                                        >
+                                            หมายเหตุ: ข้อความนี้เป็นการตีความจาก AI ใช้เพื่อประกอบการพิจารณา
+                                            ไม่ควรใช้ตัดสินใจเรื่องสำคัญเพียงอย่างเดียว
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Action Buttons */}
                             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '32px' }}>
