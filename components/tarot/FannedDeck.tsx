@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TarotCard from './TarotCard';
 import { TarotCard as TarotCardType } from '@/types/tarot';
@@ -8,7 +8,7 @@ import '@/styles/tarot.css';
 
 interface FannedDeckProps {
     cards: TarotCardType[];
-    onCardSelect: (index: number) => void;
+    onCardSelect: (cardId: string) => void;
     size?: 'small' | 'medium' | 'large';
     maxVisibleCards?: number;
 }
@@ -26,10 +26,33 @@ export default function FannedDeck({
 }: FannedDeckProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [pickingIndex, setPickingIndex] = useState<number | null>(null);
+    // Track ไพ่ที่เคยแสดงแล้ว เพื่อไม่ให้ initial animation ทำงานซ้ำ
+    const hasRenderedRef = useRef<Set<string>>(new Set());
 
     // แสดงไพ่ได้สูงสุด 78 ใบ (วงกลม 2 ชั้น)
-    const visibleCards = cards.slice(0, Math.min(maxVisibleCards, 78));
+    // จำกัดไม่ให้เกิน 78 ใบเพื่อป้องกันการแสดงไพ่ซ้ำ
+    // Filter duplicate cards โดยใช้ Set เพื่อเก็บ card.id ที่เจอแล้ว
+    // คำนวณใหม่ทุกครั้งที่ cards เปลี่ยน (ไม่ใช้ useMemo เพื่อให้ตัวเลขอัปเดตทันที)
+    const uniqueCards: TarotCardType[] = [];
+    const seenIds = new Set<string>();
+    
+    for (const card of cards) {
+        if (!seenIds.has(card.id)) {
+            seenIds.add(card.id);
+            uniqueCards.push(card);
+        }
+    }
+    
+    const maxCards = Math.min(uniqueCards.length, 78, maxVisibleCards);
+    const visibleCards = uniqueCards.slice(0, maxCards);
     const totalCards = visibleCards.length;
+
+    // Track ไพ่ที่แสดงแล้ว
+    useEffect(() => {
+        visibleCards.forEach(card => {
+            hasRenderedRef.current.add(card.id);
+        });
+    }, [visibleCards]);
 
     // แบ่งไพ่เป็น 2 ชั้น (วงนอกและวงใน)
     const outerRingCount = Math.ceil(totalCards / 2); // วงนอก: ครึ่งบน (เศษไปวงนอก)
@@ -62,7 +85,7 @@ export default function FannedDeck({
         };
     };
 
-    const handleCardClick = (index: number) => {
+    const handleCardClick = (card: TarotCardType, index: number) => {
         setPickingIndex(index);
         
         // เล่นเสียง (optional)
@@ -70,7 +93,9 @@ export default function FannedDeck({
 
         // รอ animation เสร็จแล้วค่อย callback
         setTimeout(() => {
-            onCardSelect(index);
+            // ลบ card.id ออกจาก hasRenderedRef เมื่อไพ่ถูกเลือกออกไป
+            hasRenderedRef.current.delete(card.id);
+            onCardSelect(card.id);
             setPickingIndex(null);
         }, 600);
     };
@@ -83,15 +108,18 @@ export default function FannedDeck({
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '32px',
-            padding: '40px 20px',
-            width: '100%',
-            overflow: 'hidden'
-        }}>
+        <div 
+            key={`deck-${cards.length}-${totalCards}`}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '32px',
+                padding: '40px 20px',
+                width: '100%',
+                overflow: 'hidden'
+            }}
+        >
             {/* Circle Container - ขนาดใหญ่ขึ้นเพื่อรองรับวงกลม 2 ชั้น */}
             <div style={{
                 position: 'relative',
@@ -156,7 +184,7 @@ export default function FannedDeck({
                     🔮
                 </div>
                 
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="popLayout" initial={false}>
                     {visibleCards.map((card, index) => {
                         const { x, y, rotation, isOuterRing } = getCirclePosition(index);
                         const isHovered = hoveredIndex === index;
@@ -164,48 +192,69 @@ export default function FannedDeck({
                         // วงนอกใหญ่กว่าวงในเล็กน้อย
                         const cardScale = isOuterRing ? 0.75 : 0.65;
 
+                        const hasRendered = hasRenderedRef.current.has(card.id);
+                        
                         return (
                             <motion.div
                                 key={card.id}
-                                initial={{
+                                layoutId={card.id}
+                                initial={hasRendered ? false : {
                                     opacity: 0,
-                                    scale: 0,
-                                    x: 0,
-                                    y: 0
+                                    scale: 0
                                 }}
                                 animate={{
                                     opacity: isPicking ? 0 : 1,
-                                    scale: isHovered ? cardScale * 1.15 : cardScale, // ขยาย 15% เมื่อ hover
-                                    rotate: rotation,
-                                    x: x,
-                                    y: y,
+                                    scale: isPicking ? 0 : (isHovered ? cardScale * 1.15 : cardScale),
+                                    rotate: isPicking ? rotation + 180 : rotation,
+                                    x: isPicking ? 0 : x,
+                                    y: isPicking ? 0 : y,
                                     z: isHovered ? 60 : 0,
-                                    // z-index: ไพ่ที่ hover อยู่ด้านบนสุด, ไพ่อื่นๆ เรียงตามลำดับ
+                                    filter: isPicking ? 'blur(10px)' : 'none'
                                 }}
                                 exit={{
                                     opacity: 0,
-                                    scale: 0.3,
+                                    scale: 0,
                                     x: 0,
                                     y: 0,
+                                    rotate: rotation + 360,
                                     transition: { 
-                                        duration: 0.6,
+                                        duration: 0.8,
                                         ease: [0.43, 0.13, 0.23, 0.96]
                                     }
                                 }}
-                                transition={{
-                                    type: 'spring',
-                                    stiffness: 280,
-                                    damping: 22,
-                                    delay: index * 0.05
+                                transition={hasRendered ? {
+                                    // สำหรับไพ่ที่เคยแสดงแล้ว: ขยับไปตำแหน่งใหม่แบบ smooth แต่ไม่ re-animate opacity/scale
+                                    layout: {
+                                        type: 'spring',
+                                        stiffness: 400,
+                                        damping: 35
+                                    },
+                                    x: { type: 'spring', stiffness: 400, damping: 35 },
+                                    y: { type: 'spring', stiffness: 400, damping: 35 },
+                                    rotate: { type: 'spring', stiffness: 400, damping: 35 },
+                                    opacity: { duration: 0 },
+                                    scale: { duration: 0 }
+                                } : {
+                                    // สำหรับไพ่ใหม่: ใช้ spring animation แบบเต็ม
+                                    layout: {
+                                        type: 'spring',
+                                        stiffness: 300,
+                                        damping: 30
+                                    },
+                                    opacity: { duration: 0.2 },
+                                    scale: { duration: 0.2 },
+                                    rotate: { duration: 0.3 },
+                                    x: { type: 'spring', stiffness: 300, damping: 30 },
+                                    y: { type: 'spring', stiffness: 300, damping: 30 }
                                 }}
                                 whileHover={{
-                                    scale: cardScale * 1.15, // ขยาย 15% จากขนาดปกติ
+                                    scale: cardScale * 1.15,
                                     z: 60,
                                     transition: { duration: 0.2 }
                                 }}
                                 onHoverStart={() => setHoveredIndex(index)}
                                 onHoverEnd={() => setHoveredIndex(null)}
-                                onClick={() => handleCardClick(index)}
+                                onClick={() => handleCardClick(card, index)}
                                 style={{
                                     position: 'absolute',
                                     cursor: 'pointer',
@@ -249,26 +298,84 @@ export default function FannedDeck({
                 }}>
                     🔮 วงกลมลึกลับ 2 ชั้น - เลือกไพ่ที่เรียกหาคุณ 🔮
                 </div>
-                <div style={{
-                    color: 'var(--cosmic-lavender)',
-                    fontSize: '0.9rem',
-                    opacity: 0.8,
-                    fontStyle: 'italic'
-                }}>
+                <motion.div
+                    key={`${outerRingCount}-${innerRingCount}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.8 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                        color: 'var(--cosmic-lavender)',
+                        fontSize: '0.9rem',
+                        opacity: 0.8,
+                        fontStyle: 'italic'
+                    }}
+                >
                     (วงนอก {outerRingCount} ใบ | วงใน {innerRingCount} ใบ | รวม {totalCards} ใบ)
-                </div>
+                </motion.div>
             </motion.div>
 
-            {/* Card Counter */}
-            <div style={{
-                fontFamily: 'var(--font-thai)',
-                color: 'var(--cosmic-light-purple)',
-                fontSize: '0.95rem',
-                textAlign: 'center',
-                opacity: 0.8
-            }}>
-                เหลือไพ่ {cards.length} ใบ
-            </div>
+            {/* Card Counter with Progress */}
+            <motion.div
+                key={totalCards}
+                initial={{ scale: 1.2, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 0.9 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                    fontFamily: 'var(--font-thai)',
+                    textAlign: 'center',
+                    opacity: 0.9,
+                    width: '100%',
+                    maxWidth: '400px'
+                }}
+            >
+                <div style={{ 
+                    color: 'var(--cosmic-gold)', 
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                    marginBottom: '12px'
+                }}>
+                    เหลือไพ่ {totalCards} ใบ
+                </div>
+                
+                {/* Progress Bar */}
+                {maxVisibleCards && maxVisibleCards > 0 && (
+                    <div style={{
+                        width: '100%',
+                        height: '6px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        marginTop: '8px'
+                    }}>
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ 
+                                width: `${(totalCards / maxVisibleCards) * 100}%` 
+                            }}
+                            transition={{ duration: 0.5, ease: 'easeOut' }}
+                            style={{
+                                height: '100%',
+                                background: 'var(--gradient-gold)',
+                                borderRadius: '10px',
+                                boxShadow: '0 0 10px rgba(255, 215, 0, 0.6)'
+                            }}
+                        />
+                    </div>
+                )}
+                
+                {cards.length > 78 && (
+                    <span style={{ 
+                        fontSize: '0.85rem', 
+                        opacity: 0.7, 
+                        display: 'block', 
+                        marginTop: '8px',
+                        color: 'var(--cosmic-lavender)'
+                    }}>
+                        (แสดง {maxCards} ใบแรก)
+                    </span>
+                )}
+            </motion.div>
         </div>
     );
 }

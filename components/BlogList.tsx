@@ -5,10 +5,10 @@ import { BookOpen, X, Share2, Star } from 'lucide-react';
 
 const BlogList: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('ทั้งหมด');
 
-  const categories = ['All', ...Array.from(new Set(MOCK_POSTS.map(p => p.category)))];
-  const filteredPosts = activeCategory === 'All' 
+  const categories = ['ทั้งหมด', ...Array.from(new Set(MOCK_POSTS.map(p => p.category)))];
+  const filteredPosts = activeCategory === 'ทั้งหมด' 
     ? MOCK_POSTS 
     : MOCK_POSTS.filter(p => p.category === activeCategory);
 
@@ -17,7 +17,7 @@ const BlogList: React.FC = () => {
       {!selectedPost ? (
         <>
           <h2 className="text-4xl font-serif text-white mb-8 text-center border-b border-cosmic-gold/20 pb-4">
-            The Archives
+            คลังบทความลึกลับ
           </h2>
           
           {/* Filter */}
@@ -56,7 +56,7 @@ const BlogList: React.FC = () => {
                   <p className="text-gray-400 text-sm line-clamp-3 font-sans">{post.excerpt}</p>
                   <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
                     <span>{post.date}</span>
-                    <span className="flex items-center gap-1 group-hover:text-purple-300 transition">Read <BookOpen className="w-3 h-3" /></span>
+                    <span className="flex items-center gap-1 group-hover:text-purple-300 transition">อ่านเพิ่มเติม <BookOpen className="w-3 h-3" /></span>
                   </div>
                 </div>
               </div>
@@ -69,7 +69,7 @@ const BlogList: React.FC = () => {
             onClick={() => setSelectedPost(null)}
             className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition"
           >
-            <X className="w-5 h-5" /> Back to Archives
+            <X className="w-5 h-5" /> กลับไปหน้าบทความ
           </button>
 
           <article className="bg-slate-900/80 border border-slate-700 rounded-2xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
@@ -90,14 +90,14 @@ const BlogList: React.FC = () => {
 
             <div className="mt-12 bg-black/40 border border-cosmic-gold/30 p-6 rounded-lg">
               <h4 className="text-cosmic-gold font-serif flex items-center gap-2 mb-2">
-                <Star className="w-4 h-4" /> Watcher's Insight
+                <Star className="w-4 h-4" /> สารจากผู้พิทักษ์
               </h4>
               <p className="text-sm md:text-base text-gray-300 italic">"{selectedPost.watcherInsight}"</p>
             </div>
             
             <div className="mt-8 flex gap-4">
                 <button className="flex items-center gap-2 text-sm text-gray-400 hover:text-cosmic-gold transition">
-                    <Share2 className="w-4 h-4"/> Share Secret
+                    <Share2 className="w-4 h-4"/> แชร์บทความ
                 </button>
             </div>
           </article>
