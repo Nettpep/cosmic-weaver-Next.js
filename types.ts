@@ -1,7 +1,7 @@
 export enum BlogPostCategory {
-  UNIVERSE_SECRETS = 'Universe Secrets',
-  UNSOLVED_MYSTERIES = 'Unsolved Mysteries',
-  ENERGY_MANIFESTATION = 'Energy Manifestation',
+  UNIVERSE_SECRETS = 'ความลับแห่งจักรวาล',
+  UNSOLVED_MYSTERIES = 'ปริศนาที่ยังไม่มีคำตอบ',
+  ENERGY_MANIFESTATION = 'พลังงานและการดึงดูด',
 }
 
 export interface BlogPost {

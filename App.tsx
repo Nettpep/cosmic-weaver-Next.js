@@ -141,8 +141,8 @@ const App: React.FC = () => {
         {currentView === 'SECRET_CHAMBER' && (
           <div className="min-h-[70vh] flex flex-col items-center justify-center">
              <div className="text-center mb-8">
-               <h2 className="text-3xl font-serif text-purple-300">Whispers of the Void</h2>
-               <p className="text-gray-500 text-sm">Caution: The truth is not for the faint of heart.</p>
+               <h2 className="text-3xl font-serif text-purple-300">เสียงกระซิบจากความว่างเปล่า</h2>
+               <p className="text-gray-500 text-sm">คำเตือน: ความจริงไม่ได้เหมาะสำหรับทุกคน</p>
              </div>
              <div className="w-full">
                <SecretChamber />

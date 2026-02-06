@@ -504,6 +504,16 @@
     }
 }
 
+/* Circle Animation - สำหรับวงกลมไพ่ที่หมุน */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tarot-card {

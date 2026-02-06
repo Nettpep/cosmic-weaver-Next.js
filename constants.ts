@@ -5,31 +5,31 @@ export const APP_NAME = "The Cosmic Weaver";
 export const MOCK_POSTS: BlogPost[] = [
   {
     id: '1',
-    title: "The Hum of the Void: What Listening Tells Us",
-    excerpt: "Scientists have detected a low-frequency hum permeating the cosmos. Is it the background radiation, or the breathing of a living universe?",
-    content: "Content about the void...",
+    title: "เสียงกระซิบจากความว่างเปล่า: เมื่อจักรวาลพูดกับเรา",
+    excerpt: "นักวิทยาศาสตร์ค้นพบเสียงความถี่ต่ำที่แผ่ซ่านไปทั่วจักรวาล มันคือรังสีพื้นหลังของจักรวาล หรือเป็นลมหายใจของจักรวาลที่มีชีวิต?",
+    content: "เนื้อหาเกี่ยวกับความว่างเปล่าและความลึกลับของจักรวาล...",
     category: BlogPostCategory.UNIVERSE_SECRETS,
-    watcherInsight: "The silence is not empty; it is full of answers waiting for the right question.",
+    watcherInsight: "ความเงียบไม่ได้ว่างเปล่า มันเต็มไปด้วยคำตอบที่รอคำถามที่ถูกต้อง",
     imageUrl: "https://picsum.photos/800/400?grayscale",
     date: "2023-10-27"
   },
   {
     id: '2',
-    title: "Synchronicity or Simulation?",
-    excerpt: "When numbers align and déjà vu strikes, are we seeing the code of the Matrix or the threads of Fate being pulled?",
-    content: "Content about simulation theory...",
+    title: "ความบังเอิญหรือโลกจำลอง?",
+    excerpt: "เมื่อตัวเลขเรียงตัวตรงกันและเดจาวูเกิดขึ้น เรากำลังเห็นรหัสของ Matrix หรือเส้นด้ายแห่งโชคชะตากำลังถูกดึง?",
+    content: "เนื้อหาเกี่ยวกับทฤษฎีโลกจำลอง...",
     category: BlogPostCategory.UNSOLVED_MYSTERIES,
-    watcherInsight: "Coincidence is merely a pattern you haven't zoomed out far enough to see.",
+    watcherInsight: "ความบังเอิญเป็นเพียงรูปแบบที่คุณยังซูมออกไม่ไกลพอที่จะเห็น",
     imageUrl: "https://picsum.photos/800/401?grayscale",
     date: "2023-10-25"
   },
   {
     id: '3',
-    title: "Manifesting with Starlight",
-    excerpt: "Harnessing the ancient energy of distant suns to align your personal frequency with abundance.",
-    content: "Content about energy work...",
+    title: "การดึงดูดพลังจากแสงดาว",
+    excerpt: "ใช้พลังงานโบราณจากดวงอาทิตย์ที่อยู่ห่างไกลเพื่อปรับคลื่นความถี่ของคุณให้สอดคล้องกับความอุดมสมบูรณ์",
+    content: "เนื้อหาเกี่ยวกับการทำงานกับพลังงาน...",
     category: BlogPostCategory.ENERGY_MANIFESTATION,
-    watcherInsight: "You are made of starstuff; calling upon the stars is simply calling home.",
+    watcherInsight: "คุณเกิดมาจากธุลีดาว การเรียกหาดวงดาวก็เหมือนกับการเรียกหาบ้าน",
     imageUrl: "https://picsum.photos/800/402?grayscale",
     date: "2023-10-20"
   }

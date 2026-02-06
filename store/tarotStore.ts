@@ -18,7 +18,7 @@ interface TarotStore {
     setQuestion: (question: string) => void;
     shuffleDeck: () => void;
     cutDeck: (position: number) => void;
-    drawCard: () => DrawnCard | null;
+    drawCard: (cardId?: string) => DrawnCard | null;
     drawCards: (count: number) => DrawnCard[];
     revealCard: (index: number) => void;
     saveReading: (interpretation?: string) => void;
@@ -52,7 +52,9 @@ export const useTarotStore = create<TarotStore>()(
             readingStreak: 0,
 
             startReading: (spreadConfig: SpreadConfig, question?: string) => {
-                const shuffledDeck = shuffleArray(fullDeck);
+                // ตรวจสอบและจำกัด deck ให้มีแค่ 78 ใบ (ป้องกันไพ่ซ้ำ)
+                const cleanDeck = fullDeck.slice(0, 78);
+                const shuffledDeck = shuffleArray(cleanDeck);
 
                 set({
                     currentSession: {
@@ -86,7 +88,9 @@ export const useTarotStore = create<TarotStore>()(
                 const { currentSession } = get();
                 if (!currentSession) return;
 
-                const shuffled = shuffleArray(currentSession.deckState.cards);
+                // จำกัดไม่ให้เกิน 78 ใบ (ป้องกันไพ่ซ้ำ)
+                const cleanCards = currentSession.deckState.cards.slice(0, 78);
+                const shuffled = shuffleArray(cleanCards);
 
                 set({
                     currentSession: {
@@ -106,8 +110,10 @@ export const useTarotStore = create<TarotStore>()(
                 const { currentSession } = get();
                 if (!currentSession || !currentSession.deckState.isShuffled) return;
 
+                // จำกัดไม่ให้เกิน 78 ใบ (ป้องกันไพ่ซ้ำ)
                 const { cards } = currentSession.deckState;
-                const cutCards = [...cards.slice(position), ...cards.slice(0, position)];
+                const cleanCards = cards.slice(0, 78);
+                const cutCards = [...cleanCards.slice(position), ...cleanCards.slice(0, position)];
 
                 set({
                     currentSession: {
@@ -123,13 +129,30 @@ export const useTarotStore = create<TarotStore>()(
                 });
             },
 
-            drawCard: () => {
+            drawCard: (cardId?: string) => {
                 const { currentSession } = get();
                 if (!currentSession || currentSession.deckState.remainingCards.length === 0) {
                     return null;
                 }
 
-                const [card, ...remaining] = currentSession.deckState.remainingCards;
+                let card;
+                let remaining: typeof currentSession.deckState.remainingCards;
+
+                // ถ้ามี cardId ให้จั่วไพ่ที่ตรงกับ cardId
+                if (cardId) {
+                    const cardIndex = currentSession.deckState.remainingCards.findIndex(c => c.id === cardId);
+                    if (cardIndex === -1) {
+                        // ถ้าไม่เจอ ให้จั่วไพ่ใบแรกแทน
+                        [card, ...remaining] = currentSession.deckState.remainingCards;
+                    } else {
+                        card = currentSession.deckState.remainingCards[cardIndex];
+                        remaining = currentSession.deckState.remainingCards.filter((_, i) => i !== cardIndex);
+                    }
+                } else {
+                    // ถ้าไม่มี cardId ให้จั่วไพ่ใบแรก (เดิม)
+                    [card, ...remaining] = currentSession.deckState.remainingCards;
+                }
+
                 const drawnCard: DrawnCard = {
                     card,
                     position: getRandomPosition(),

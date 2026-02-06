@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SpreadConfig } from '@/types/tarot';
 import { useTarotStore } from '@/store/tarotStore';
 import CardDeck from './CardDeck';
+import AnimatedCardDeck from './AnimatedCardDeck';
+import FannedDeck from './FannedDeck';
 import SpreadLayout from './SpreadLayout';
 import '@/styles/tarot.css';
 import { getTarotSpreadSummary } from '@/services/geminiService';
@@ -15,28 +17,38 @@ interface ReadingSessionProps {
 }
 
 export default function ReadingSession({ spread, onComplete, onCancel }: ReadingSessionProps) {
-    const {
-        currentSession,
-        setQuestion,
-        shuffleDeck,
-        cutDeck,
-        drawCard,
-        saveReading,
-        setCurrentStep,
-        resetSession
-    } = useTarotStore();
+    // ใช้ selector เพื่อ subscribe เฉพาะส่วนที่ต้องการ
+    const currentSession = useTarotStore((state) => state.currentSession);
+    // ใช้ length เป็น selector เพื่อ trigger re-render เมื่อจำนวนไพ่เปลี่ยน
+    const remainingCardsLength = useTarotStore((state) => state.currentSession?.deckState.remainingCards.length ?? 0);
+    const drawnCardsLength = useTarotStore((state) => state.currentSession?.drawnCards.length ?? 0);
+    
+    const setQuestion = useTarotStore((state) => state.setQuestion);
+    const shuffleDeck = useTarotStore((state) => state.shuffleDeck);
+    const cutDeck = useTarotStore((state) => state.cutDeck);
+    const drawCard = useTarotStore((state) => state.drawCard);
+    const saveReading = useTarotStore((state) => state.saveReading);
+    const setCurrentStep = useTarotStore((state) => state.setCurrentStep);
+    const resetSession = useTarotStore((state) => state.resetSession);
 
     const [questionInput, setQuestionInput] = useState('');
     const [isShuffling, setIsShuffling] = useState(false);
     const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
+    // Fix hydration mismatch: render stars only on client side
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     if (!currentSession) {
         return null;
     }
 
     const { currentStep, deckState, drawnCards } = currentSession;
+    const remainingCards = deckState.remainingCards;
 
     const handleAskQuestion = () => {
         if (questionInput.trim()) {
@@ -57,8 +69,8 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
         cutDeck(position);
     };
 
-    const handleDrawCard = () => {
-        const drawn = drawCard();
+    const handleDrawCard = (cardId?: string) => {
+        const drawn = drawCard(cardId);
         if (drawn && drawnCards.length + 1 >= spread.cardCount) {
             setTimeout(() => setCurrentStep('reveal'), 500);
         }
@@ -84,9 +96,9 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
 
     return (
         <div className="tarot-container" style={{ minHeight: '100vh', padding: '40px 20px' }}>
-            {/* Stars Background */}
+            {/* Stars Background - render only after mount to avoid hydration mismatch */}
             <div className="stars-background">
-                {Array.from({ length: 50 }).map((_, i) => (
+                {isMounted && Array.from({ length: 50 }).map((_, i) => (
                     <div
                         key={i}
                         className="star"
@@ -162,16 +174,15 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
                 {currentStep === 'shuffle' && (
                     <div style={{ textAlign: 'center' }}>
                         <h2 className="thai-title" style={{ fontSize: '1.8rem', marginBottom: '16px' }}>
-                            🔀 สับไพ่
+                            🔀 สับไพ่แบบกรีด (Riffle Shuffle)
                         </h2>
                         <p className="thai-body" style={{ fontSize: '1.1rem', marginBottom: '40px' }}>
-                            จดจ่อกับคำถามของคุณ แล้วคลิกเพื่อสับไพ่
+                            จดจ่อกับคำถามของคุณ แล้วสับไพ่เพื่อรับพลังงาน
                         </p>
 
-                        <CardDeck
+                        <AnimatedCardDeck
                             cards={deckState.cards}
                             onShuffle={handleShuffle}
-                            isShuffling={isShuffling}
                             size="medium"
                         />
                     </div>
@@ -181,13 +192,13 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
                 {currentStep === 'cut' && (
                     <div style={{ textAlign: 'center' }}>
                         <h2 className="thai-title" style={{ fontSize: '1.8rem', marginBottom: '16px' }}>
-                            ✂️ ตัดไพ่
+                            ✂️ ตัดไพ่ 3 กอง (Three-Pile Cut)
                         </h2>
                         <p className="thai-body" style={{ fontSize: '1.1rem', marginBottom: '40px' }}>
-                            คลิกเพื่อตัดสำรับไพ่
+                            คลิกเลือกกองไพ่ตามลำดับที่ใจเราบอก (เลือก 3 กอง)
                         </p>
 
-                        <CardDeck
+                        <AnimatedCardDeck
                             cards={deckState.remainingCards}
                             onCut={handleCut}
                             size="medium"
@@ -198,33 +209,38 @@ export default function ReadingSession({ spread, onComplete, onCancel }: Reading
                 {/* Step: Draw */}
                 {currentStep === 'draw' && (
                     <div>
-                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                             <h2 className="thai-title" style={{ fontSize: '1.8rem', marginBottom: '16px' }}>
-                                👆 จั่วไพ่
+                                ✨ จั่วไพ่ที่ใจเราเลือก
                             </h2>
                             <p className="thai-body" style={{ fontSize: '1.1rem' }}>
-                                คลิกที่สำรับไพ่เพื่อจั่วไพ่ใบต่อไป
+                                สัมผัสพลังงานของไพ่แต่ละใบ แล้วเลือกใบที่ดึงดูดคุณ
                             </p>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '60px', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                            {/* Deck */}
-                            <div>
-                                <CardDeck
-                                    cards={deckState.remainingCards}
-                                    onCardDraw={handleDrawCard}
-                                    size="medium"
-                                />
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center' }}>
+                            {/* Fanned Deck - วงกลม 2 ชั้น แสดงไพ่ครบ 78 ใบ */}
+                            <FannedDeck
+                                key={`deck-${remainingCardsLength}-${drawnCardsLength}`}
+                                cards={remainingCards}
+                                onCardSelect={(cardId) => {
+                                    // ส่ง cardId ไปให้ handleDrawCard เพื่อจั่วไพ่ที่ถูกต้อง
+                                    handleDrawCard(cardId);
+                                }}
+                                size="medium"
+                                maxVisibleCards={78} // แสดงครบทั้ง 78 ใบ (วงนอก 39 + วงใน 39)
+                            />
 
                             {/* Spread Preview */}
-                            <div style={{ flex: 1, minWidth: '400px' }}>
-                                <SpreadLayout
-                                    spread={spread}
-                                    drawnCards={drawnCards}
-                                    animateReveal={true}
-                                />
-                            </div>
+                            {drawnCards.length > 0 && (
+                                <div style={{ width: '100%', maxWidth: '800px' }}>
+                                    <SpreadLayout
+                                        spread={spread}
+                                        drawnCards={drawnCards}
+                                        animateReveal={true}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
